@@ -37,15 +37,28 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Get the first level (ordered by 'order' column) as default
+        $firstLevel = \App\Models\Level::orderBy('order')->first();
+        
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'gender' => $request->gender,
             'age' => $request->age,
             'password' => Hash::make($request->password),
+            'current_level_id' => $firstLevel?->id, // Default to first level
         ]);
 
         $user->assignRole('user');
+
+        // Initialize user progress (unlock level 1)
+        if ($firstLevel) {
+            \App\Models\UserProgress::create([
+                'user_id' => $user->id,
+                'current_level_id' => $firstLevel->id,
+                'highest_unlocked_level_id' => $firstLevel->id,
+            ]);
+        }
 
         event(new Registered($user));
 

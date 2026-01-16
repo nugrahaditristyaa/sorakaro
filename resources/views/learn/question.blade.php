@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+        <x-ui.container size="sm">
 
             {{-- Progress & Score Bar --}}
             <div class="flex items-center justify-between mb-4">
@@ -23,12 +23,12 @@
                 <div class="bg-gray-800 h-2.5 rounded-full transition-all duration-300" style="width: {{ ($progress['current'] / $progress['total']) * 100 }}%"></div>
             </div>
 
-            <div class="bg-white p-6 rounded shadow relative">
+            <x-ui.card>
                 
                 {{-- Question Prompt --}}
-                <div class="text-lg font-semibold mb-6">
+                <x-ui.section-title :level="2" class="mb-6">
                     {{ $question->prompt }}
-                </div>
+                </x-ui.section-title>
 
                 <form method="POST" action="{{ route('learn.submit', [$lesson, $question]) }}">
                     @csrf
@@ -93,27 +93,27 @@
                     <div class="mt-8 flex items-center justify-between">
                         {{-- BACK BUTTON --}}
                         @if ($prevUrl)
-                            <a href="{{ $prevUrl }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-medium">
+                            <x-ui.button variant="ghost" :href="$prevUrl">
                                 &larr; Previous
-                            </a>
+                            </x-ui.button>
                         @else
                             <div></div> {{-- Spacer --}}
                         @endif
 
                         {{-- ACTION BUTTON --}}
                         @if (isset($userAnswer))
-                            <a href="{{ $nextUrl }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none transition ease-in-out duration-150">
+                            <x-ui.button variant="primary" :href="$nextUrl">
                                 {{ Str::contains($nextUrl, 'result') ? 'Finish Quiz' : 'Next Question' }} &rarr;
-                            </a>
+                            </x-ui.button>
                         @else
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none transition ease-in-out duration-150">
+                            <x-ui.button variant="primary" type="submit">
                                 Check Answer
-                            </button>
+                            </x-ui.button>
                         @endif
                     </div>
                 </form>
-            </div>
+            </x-ui.card>
 
-        </div>
+        </x-ui.container>
     </div>
 </x-app-layout>

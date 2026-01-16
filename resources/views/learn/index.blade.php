@@ -6,28 +6,77 @@
     </x-slot>
 
     <div class="pt-4 pb-8">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-4">
+        <x-ui.container>
 
             @if (session('error'))
-                <div class="p-3 rounded bg-red-100 text-red-800">
+                <div class="p-3 rounded bg-red-100 text-red-800 mb-4">
                     {{ session('error') }}
                 </div>
             @endif
 
-            @foreach ($levels as $level)
-                <div class="bg-white p-6 rounded shadow flex items-center justify-between mb-4">
-                    <div>
-                        <div class="font-bold text-xl text-gray-800">{{ $level->name }}</div>
-                        @if ($level->description)
-                            <div class="text-sm text-gray-600 mt-1">{{ $level->description }}</div>
-                        @endif
-                    </div>
-                    
-                    <a href="{{ route('learn.level', $level) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none transition ease-in-out duration-150">
-                        Join Quiz
-                    </a>
+            @if (session('success'))
+                <div class="p-3 rounded bg-green-100 text-green-800 mb-4">
+                    {{ session('success') }}
                 </div>
-            @endforeach
-        </div>
+            @endif
+
+            <div class="space-y-4">
+                @foreach ($levels as $level)
+                    @php
+                        $isUnlocked = $user->hasUnlockedLevel($level);
+                    @endphp
+                    
+                    <x-ui.card class="{{ !$isUnlocked ? 'opacity-60' : '' }}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <x-ui.section-title :level="2">{{ $level->name }}</x-ui.section-title>
+                                    
+                                    @if (!$isUnlocked)
+                                        <x-ui.badge variant="locked">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                            </svg>
+                                            Locked
+                                        </x-ui.badge>
+                                    @else
+                                        <x-ui.badge variant="unlocked">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                            </svg>
+                                            Unlocked
+                                        </x-ui.badge>
+                                    @endif
+                                </div>
+                                
+                                @if ($level->description)
+                                    <div class="text-sm text-gray-600">{{ $level->description }}</div>
+                                @endif
+                                
+                                @if (!$isUnlocked)
+                                    <div class="text-xs text-gray-500 mt-2">
+                                        Complete previous levels to unlock
+                                    </div>
+                                @endif
+                            </div>
+                            
+                            @if ($isUnlocked)
+                                <x-ui.button variant="primary" :href="route('learn.level', $level)">
+                                    Join Quiz
+                                </x-ui.button>
+                            @else
+                                <x-ui.button variant="disabled" disabled>
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                    </svg>
+                                    Locked
+                                </x-ui.button>
+                            @endif
+                        </div>
+                    </x-ui.card>
+                @endforeach
+            </div>
+
+        </x-ui.container>
     </div>
 </x-app-layout>

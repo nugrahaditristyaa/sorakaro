@@ -5,16 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Attempt;
 use App\Models\AttemptAnswer;
 use App\Models\Lesson;
+use App\Models\Level;
 use App\Models\Question;
 use Illuminate\Http\Request;
 
 class LearnController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Tampilkan level only
+        $user = $request->user();
         $levels = \App\Models\Level::orderBy('order')->get();
-        return view('learn.index', compact('levels'));
+        
+        return view('learn.index', compact('levels', 'user'));
     }
 
     public function showLevel(\App\Models\Level $level)
@@ -61,19 +63,57 @@ class LearnController extends Controller
     {
         $user = $request->user();
         
-
+        // Get user's current level (with fallback to first level)
+        $currentLevel = null;
+        if ($user->current_level_id) {
+            $currentLevel = Level::find($user->current_level_id);
+        }
+        
+        // Fallback to first level if user has no level set
+        if (!$currentLevel) {
+            $currentLevel = Level::orderBy('order')->first();
             
-        // 3. Continue Learning (Find most recent unfinished attempt)
-        // We only care if the lesson actually has questions, safe to assume existing attempts implied that.
+            // Auto-assign first level to user if they don't have one
+            if ($currentLevel && !$user->current_level_id) {
+                $user->update(['current_level_id' => $currentLevel->id]);
+            }
+        }
+            
+        // Find most recent unfinished attempt
         $lastUnfinished = Attempt::with(['lesson', 'lesson.level'])
             ->where('user_id', $user->id)
             ->whereNull('finished_at')
-            ->latest('updated_at') // Most recently interacted
+            ->latest('updated_at')
             ->first();
 
+        return view('dashboard', compact('lastUnfinished', 'currentLevel'));
+    }
 
-
-        return view('dashboard', compact('lastUnfinished'));
+    /**
+     * Redirect to current level's guidebook
+     */
+    public function dashboardGuidebook(Request $request)
+    {
+        $user = $request->user();
+        
+        // Get user's current level
+        $currentLevel = null;
+        if ($user->current_level_id) {
+            $currentLevel = Level::find($user->current_level_id);
+        }
+        
+        // Fallback to first level
+        if (!$currentLevel) {
+            $currentLevel = Level::orderBy('order')->first();
+        }
+        
+        // Redirect to guidebook page
+        if ($currentLevel) {
+            return redirect()->route('learn.guidebook', $currentLevel);
+        }
+        
+        // If no levels exist, redirect back to dashboard with error
+        return redirect()->route('dashboard')->with('error', 'No levels available yet.');
     }
 
     public function resume(Request $request, \App\Models\Attempt $attempt)
@@ -239,13 +279,17 @@ class LearnController extends Controller
             ->count();
         $attempt->update(['score' => $score]);
 
-        // If last question, mark finished
+        // If last question, mark finished and check for level unlock
         $isLastQuestion = $lesson->questions()
             ->orderBy('order')->orderBy('id')
             ->get()->last()->id === $question->id;
 
         if ($isLastQuestion) {
             $attempt->update(['finished_at' => now()]);
+            
+            // Check and unlock next level if current level is completed
+            $unlockService = app(\App\Services\LevelUnlockService::class);
+            $unlockService->checkAndUnlockNextLevel($request->user(), $lesson);
         }
 
         // Redirect back for feedback

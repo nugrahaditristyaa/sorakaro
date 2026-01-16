@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'gender',
         'age',
+        'current_level_id',
     ];
 
     /**
@@ -59,5 +60,51 @@ class User extends Authenticatable
             'female' => '👩🏻‍💼',
             default => '👤',
         };
+    }
+
+    /**
+     * Get the user's current level
+     */
+    public function currentLevel()
+    {
+        return $this->belongsTo(Level::class, 'current_level_id');
+    }
+
+    /**
+     * Get the user's progress record
+     */
+    public function progress()
+    {
+        return $this->hasOne(UserProgress::class);
+    }
+
+    /**
+     * Get the user's attempts
+     */
+    public function attempts()
+    {
+        return $this->hasMany(Attempt::class);
+    }
+
+    /**
+     * Check if a level is unlocked for this user
+     */
+    public function hasUnlockedLevel(Level $level): bool
+    {
+        $progress = $this->progress;
+        
+        if (!$progress || !$progress->highestUnlockedLevel) {
+            return $level->order === 1; // Only level 1 unlocked by default
+        }
+        
+        return $level->order <= $progress->highestUnlockedLevel->order;
+    }
+
+    /**
+     * Get highest unlocked level order
+     */
+    public function getHighestUnlockedOrder(): int
+    {
+        return $this->progress?->getHighestUnlockedOrder() ?? 1;
     }
 }

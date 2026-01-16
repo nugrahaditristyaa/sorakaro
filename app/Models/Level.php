@@ -12,4 +12,9 @@ class Level extends Model
     {
         return $this->hasMany(Lesson::class);
     }
+
+    public function guidebookSections()
+    {
+        return $this->hasMany(GuidebookSection::class)->orderBy('order');
+    }
 }
