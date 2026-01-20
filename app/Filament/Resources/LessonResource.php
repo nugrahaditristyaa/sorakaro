@@ -43,6 +43,14 @@ class LessonResource extends Resource
                 ->label('Order')
                 ->numeric()
                 ->default(0),
+
+            TextInput::make('pass_rate')
+                ->label('Pass Rate (%)')
+                ->numeric()
+                ->default(70)
+                ->minValue(0)
+                ->maxValue(100)
+                ->required(),
         ]);
     }
 
@@ -60,6 +68,11 @@ class LessonResource extends Resource
                     ->label('Title')
                     ->sortable()
                     ->searchable(),
+
+                TextColumn::make('pass_rate')
+                    ->label('Pass Rate')
+                    ->formatStateUsing(fn (string $state): string => "{$state}%")
+                    ->sortable(),
 
                 TextColumn::make('order')
                     ->label('Order')

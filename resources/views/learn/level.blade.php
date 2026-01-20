@@ -52,11 +52,13 @@
                                     <div class="flex flex-wrap items-center gap-2 mt-2">
                                         {{-- Status Badge --}}
                                         @if($lesson->status === 'completed')
-                                            <x-ui.badge variant="success">Selesai</x-ui.badge>
+                                            <x-ui.badge variant="success">Passed</x-ui.badge>
+                                        @elseif($lesson->status === 'failed')
+                                            <x-ui.badge variant="danger">Failed</x-ui.badge>
                                         @elseif($lesson->status === 'in_progress')
-                                            <x-ui.badge variant="warning">Sedang</x-ui.badge>
+                                            <x-ui.badge variant="warning">In Progress</x-ui.badge>
                                         @else
-                                            <x-ui.badge variant="default">Belum mulai</x-ui.badge>
+                                            <x-ui.badge variant="default">Not Started</x-ui.badge>
                                         @endif
 
                                         {{-- Last Score --}}

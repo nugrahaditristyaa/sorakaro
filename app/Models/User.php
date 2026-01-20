@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,14 +9,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -27,21 +20,11 @@ class User extends Authenticatable
         'current_level_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -51,11 +34,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the avatar icon based on gender
+     * Avatar icon based on gender
      */
     public function getAvatarIcon(): string
     {
-        return match($this->gender) {
+        return match ($this->gender) {
             'male' => '🧑🏻‍💼',
             'female' => '👩🏻‍💼',
             default => '👤',
@@ -63,7 +46,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the user's current level
+     * User's current level (users.current_level_id)
      */
     public function currentLevel()
     {
@@ -71,7 +54,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the user's progress record
+     * Progress record (user_progress)
      */
     public function progress()
     {
@@ -79,7 +62,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the user's attempts
+     * Attempts
      */
     public function attempts()
     {
@@ -87,24 +70,39 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if a level is unlocked for this user
+     * Check if a level is unlocked for this user.
+     * Source of truth: user_progress.highest_unlocked_level_id
      */
+
     public function hasUnlockedLevel(Level $level): bool
     {
-        $progress = $this->progress;
-        
-        if (!$progress || !$progress->highestUnlockedLevel) {
-            return $level->order === 1; // Only level 1 unlocked by default
+        $highestId = \App\Models\UserProgress::where('user_id', $this->id)
+            ->value('highest_unlocked_level_id');
+
+        // If no progress yet: only the first level is unlocked
+        if (!$highestId) {
+            $firstLevelId = Level::orderBy('order')->value('id');
+            return $firstLevelId ? ((int) $level->id === (int) $firstLevelId) : ($level->order === 1);
         }
-        
-        return $level->order <= $progress->highestUnlockedLevel->order;
+
+        $highestOrder = Level::where('id', $highestId)->value('order') ?? 1;
+
+        return (int) $level->order <= (int) $highestOrder;
     }
 
     /**
-     * Get highest unlocked level order
+     * Highest unlocked order (helper)
      */
     public function getHighestUnlockedOrder(): int
     {
-        return $this->progress?->getHighestUnlockedOrder() ?? 1;
+        $progress = $this->progress;
+
+        if (!$progress || !$progress->highest_unlocked_level_id) {
+            return 1;
+        }
+
+        $highestUnlocked = Level::find($progress->highest_unlocked_level_id);
+
+        return $highestUnlocked?->order ?? 1;
     }
 }

@@ -25,7 +25,9 @@ class LevelUnlockService
         }
 
         // Get next level
-        $nextLevel = Level::where('order', $currentLevel->order + 1)->first();
+        $nextLevel = Level::where('order', '>', $currentLevel->order)
+        ->orderBy('order')
+        ->first();
         
         if (!$nextLevel) {
             // No next level exists (user completed final level)
@@ -56,6 +58,7 @@ class LevelUnlockService
             ->where('attempts.user_id', $user->id)
             ->where('lessons.level_id', $level->id)
             ->whereNotNull('attempts.finished_at')
+            ->where('attempts.passed', true)
             ->distinct('attempts.lesson_id')
             ->count('attempts.lesson_id');
 
@@ -69,28 +72,42 @@ class LevelUnlockService
     {
         $progress = $user->progress;
 
+        // Create progress record if it doesn't exist
         if (!$progress) {
-            // Create progress record if it doesn't exist
-            $progress = UserProgress::create([
+            UserProgress::create([
                 'user_id' => $user->id,
                 'current_level_id' => $level->id,
                 'highest_unlocked_level_id' => $level->id,
             ]);
-            
+
+            // Optional sync users table
+            $user->update(['current_level_id' => $level->id]);
+
             Log::info("Created progress for user {$user->id}, unlocked level {$level->id}");
             return;
         }
 
-        // Only update if this level is higher than current highest
-        if (!$progress->highestUnlockedLevel || $level->order > $progress->highestUnlockedLevel->order) {
+        // ✅ Compare using raw ID (no relation dependency)
+        $currentHighest = Level::find($progress->highest_unlocked_level_id);
+
+        // If highest is missing (corrupt), treat as lowest
+        $currentHighestOrder = $currentHighest?->order ?? 0;
+
+        // Update only if new level is higher
+        if ($level->order > $currentHighestOrder) {
             $progress->update([
                 'highest_unlocked_level_id' => $level->id,
-                'current_level_id' => $level->id, // Auto-advance to next level
+                'current_level_id' => $level->id,
             ]);
-            
+
+            // Optional sync users table
+            $user->update(['current_level_id' => $level->id]);
+
             Log::info("User {$user->id} unlocked level {$level->id} ({$level->name})");
         }
     }
+
+
 
     /**
      * Initialize progress for a new user (set to level 1)

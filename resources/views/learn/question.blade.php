@@ -8,21 +8,12 @@
     <div class="py-8">
         <x-ui.container size="sm">
 
-            {{-- Progress & Score Bar --}}
-            <div class="flex items-center justify-between mb-4">
-                <div class="text-sm font-medium text-gray-600">
-                    Question {{ $progress['current'] }} of {{ $progress['total'] }}
-                </div>
-                <div class="text-sm font-medium text-gray-600">
-                    Score: {{ $attempt->score }} / {{ $progress['total'] }}
-                </div>
-            </div>
-
-            {{-- Continuous Progress Bar Visual --}}
-            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
-                <div class="bg-gray-800 h-2.5 rounded-full transition-all duration-300" style="width: {{ ($progress['current'] / $progress['total']) * 100 }}%"></div>
-            </div>
-
+            <x-ui.progress-bar
+                :current="$progress['current']"
+                :total="$progress['total']"
+                :score="$attempt->score"
+                :answered="$answeredCount"
+            />
             <x-ui.card>
                 
                 {{-- Question Prompt --}}
@@ -36,7 +27,7 @@
                     <div class="space-y-3">
                         @foreach ($choices as $choice)
                             @php
-                                $isAnswered = isset($userAnswer);
+                                $isAnswered = (bool) $userAnswer;
                                 $isSelected = $isAnswered && $userAnswer->choice_id == $choice->id;
                                 $isCorrect = $choice->is_correct;
                                 
@@ -72,7 +63,16 @@
                     @enderror
 
                     {{-- Feedback / Actions Area --}}
-                    @if (isset($userAnswer))
+                    @if ($userAnswer)
+                        <x-ui.quiz-feedback
+                            :is-correct="$userAnswer->is_correct"
+                            :explanation="$question->explanation"
+                        />
+                    @endif
+
+
+
+                    <!-- @if (isset($userAnswer))
                         <div class="mt-6 p-4 rounded-lg {{ $userAnswer->is_correct ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200' }}">
                             <div class="flex items-center gap-3 mb-2">
                                 <div class="text-2xl">
@@ -88,7 +88,7 @@
                                 </div>
                             @endif
                         </div>
-                    @endif
+                    @endif -->
 
                     <div class="mt-8 flex items-center justify-between">
                         {{-- BACK BUTTON --}}
@@ -103,7 +103,8 @@
                         {{-- ACTION BUTTON --}}
                         @if (isset($userAnswer))
                             <x-ui.button variant="primary" :href="$nextUrl">
-                                {{ Str::contains($nextUrl, 'result') ? 'Finish Quiz' : 'Next Question' }} &rarr;
+                                {{ str_contains($nextUrl, 'result') ? 'Finish Quiz' : 'Next Question' }}
+                                &rarr;
                             </x-ui.button>
                         @else
                             <x-ui.button variant="primary" type="submit">

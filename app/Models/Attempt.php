@@ -12,10 +12,12 @@ class Attempt extends Model
         'score',
         'total_questions',
         'finished_at',
+        'passed',
     ];
 
     protected $casts = [
         'finished_at' => 'datetime',
+        'passed' => 'boolean',
     ];
 
     public function user()
