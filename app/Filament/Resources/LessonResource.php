@@ -20,6 +20,7 @@ class LessonResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel = 'Lessons';
+    protected static ?string $navigationGroup = 'Quiz';
     protected static ?string $modelLabel = 'Lesson';
     protected static ?string $pluralModelLabel = 'Lessons';
     protected static ?int $navigationSort = 2;

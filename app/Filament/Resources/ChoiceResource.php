@@ -22,6 +22,7 @@ class ChoiceResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
     protected static ?string $navigationLabel = 'Choices';
+    protected static ?string $navigationGroup = 'Quiz';
     protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
