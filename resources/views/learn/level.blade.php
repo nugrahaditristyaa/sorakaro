@@ -1,10 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ $level->name }}
-            </h2>
-        </div>
+        <x-ui.breadcrumb :items="[
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Levels', 'url' => route('learn.index')],
+            ['label' => $level->name]
+        ]" />
     </x-slot>
 
     <div class="pt-4 pb-8">

@@ -1,21 +1,59 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Dashboard') }}
-            </h2>
-        </div>
+        <x-ui.breadcrumb :items="[
+            ['label' => 'Dashboard']
+        ]" />
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-8">
         <x-ui.container>
             <div class="space-y-6">
 
-                {{-- Current Level & Guidebook Section --}}
-                @if($currentLevel)
+                {{-- ROW 1: KPI GRID --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <x-ui.card>
-                        <div class="flex items-start justify-between gap-6">
-                            <div class="min-w-0">
+                        <div class="text-sm text-gray-500">Total Attempts</div>
+                        <div class="mt-2 text-3xl font-bold text-gray-900">{{ $totalAttempts ?? 0 }}</div>
+                        <div class="mt-1 text-xs text-gray-500">All time</div>
+                    </x-ui.card>
+
+                    <x-ui.card>
+                        <div class="text-sm text-gray-500">Average Score</div>
+                        <div class="mt-2 text-3xl font-bold text-gray-900">{{ $avgScore ?? 0 }}%</div>
+                        <div class="mt-1 text-xs text-gray-500">All attempts</div>
+                    </x-ui.card>
+
+                    <x-ui.card>
+                        <div class="text-sm text-gray-500">Pass Rate</div>
+                        <div class="mt-2 text-3xl font-bold text-gray-900">{{ $passRate ?? 0 }}%</div>
+
+                        @php($pass = (int) ($passRate ?? 0))
+                        <div class="mt-4 w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-gray-900 h-2.5 rounded-full" style="width: {{ max(0, min(100, $pass)) }}%"></div>
+                        </div>
+
+                        <div class="mt-2 text-xs text-gray-500">Based on completed attempts</div>
+                    </x-ui.card>
+
+                    <x-ui.card>
+                        <div class="text-sm text-gray-500">Current Level</div>
+                        <div class="mt-2 text-lg font-semibold text-gray-900">
+                            {{ $currentLevel?->name ?? '—' }}
+                        </div>
+                        <div class="mt-4">
+                            <x-ui.button variant="primary" :href="route('dashboard.guidebook')">
+                                Guidebook
+                            </x-ui.button>
+                        </div>
+                    </x-ui.card>
+                </div>
+
+                {{-- ROW 2: Current Level Card (optional) + Continue Learning --}}
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {{-- Current Level & Guidebook Section (lebih detail) --}}
+                    <div class="lg:col-span-1">
+                        @if($currentLevel)
+                            <x-ui.card>
                                 <x-ui.section-title :level="3" class="mb-2">Current Level</x-ui.section-title>
 
                                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -25,54 +63,158 @@
                                         <span class="text-sm text-gray-600">{{ $currentLevel->description }}</span>
                                     @endif
                                 </div>
-                            </div>
 
-                            <x-ui.button variant="primary" :href="route('dashboard.guidebook')" class="shrink-0">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                                Guidebook
-                            </x-ui.button>
-                        </div>
-                    </x-ui.card>
-                @endif
-
-                {{-- Continue Learning Section --}}
-                <x-ui.card>
-                    <div class="flex items-center justify-between gap-4 mb-4">
-                        <x-ui.section-title :level="3">Continue Learning</x-ui.section-title>
+                                <div class="mt-4">
+                                    <x-ui.button variant="secondary" :href="route('learn.index')">
+                                        Continue →
+                                    </x-ui.button>
+                                </div>
+                            </x-ui.card>
+                        @endif
                     </div>
 
-                    @if($lastUnfinished)
-                        <div class="rounded-lg border bg-gray-50 p-4">
-                            <div class="flex items-start justify-between gap-6">
-                                <div class="min-w-0">
-                                    <div class="text-indigo-600 font-semibold text-sm">
-                                        {{ $lastUnfinished->lesson->level->name ?? 'Level' }}
-                                    </div>
-                                    <div class="text-xl font-bold text-gray-800">
-                                        {{ $lastUnfinished->lesson->title }}
-                                    </div>
-                                    <div class="text-sm text-gray-500 mt-1">
-                                        Last active: {{ $lastUnfinished->updated_at->diffForHumans() }}
+                    {{-- Continue Learning --}}
+                    <div class="lg:col-span-2">
+                        <x-ui.card>
+                            <div class="flex items-center justify-between gap-4 mb-4">
+                                <x-ui.section-title :level="3">Continue Learning</x-ui.section-title>
+                            </div>
+
+                            @if($lastUnfinished)
+                                <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                    <div class="flex items-start justify-between gap-6">
+                                        <div class="min-w-0">
+                                            <div class="text-indigo-600 font-semibold text-sm">
+                                                {{ $lastUnfinished->lesson->level->name ?? 'Level' }}
+                                            </div>
+                                            <div class="text-xl font-bold text-gray-800">
+                                                {{ $lastUnfinished->lesson->title }}
+                                            </div>
+                                            <div class="text-sm text-gray-500 mt-1">
+                                                Last active: {{ $lastUnfinished->updated_at->diffForHumans() }}
+                                            </div>
+                                        </div>
+
+                                        <x-ui.button variant="primary" :href="route('learn.resume', $lastUnfinished->id)" class="shrink-0">
+                                            Continue →
+                                        </x-ui.button>
                                     </div>
                                 </div>
+                            @else
+                                <x-ui.empty-state
+                                    title="No Unfinished Lessons"
+                                    description="You have no unfinished lessons. Start a new one!">
+                                    <x-ui.button variant="primary" :href="route('learn.index')">
+                                        Go to Learn
+                                    </x-ui.button>
+                                </x-ui.empty-state>
+                            @endif
+                        </x-ui.card>
+                    </div>
+                </div>
 
-                                <x-ui.button variant="secondary" :href="route('learn.resume', $lastUnfinished->id)" class="shrink-0">
-                                    Continue &rarr;
-                                </x-ui.button>
+                {{-- ROW 3: Attempt History + Category Performance --}}
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {{-- Attempt History --}}
+                    <div class="lg:col-span-2">
+                        <x-ui.card>
+                            <div class="flex items-center justify-between">
+                                <x-ui.section-title :level="3">Attempt History</x-ui.section-title>
+                                <a href="{{ route('attempts.index') }}" class="text-sm font-medium text-gray-800 hover:underline">
+                                    View all
+                                </a>
                             </div>
-                        </div>
-                    @else
-                        <x-ui.empty-state
-                            title="No Unfinished Lessons"
-                            description="You have no unfinished lessons. Start a new one!">
-                            <x-ui.button variant="primary" :href="route('learn.index')">
-                                Go to Learn
-                            </x-ui.button>
-                        </x-ui.empty-state>
-                    @endif
-                </x-ui.card>
+
+                            @if(empty($recentAttempts) || count($recentAttempts) === 0)
+                                <div class="mt-4 text-sm text-gray-600">
+                                    Belum ada attempt. Mulai belajar dulu ya.
+                                    <a href="{{ route('learn.index') }}" class="font-medium text-gray-900 hover:underline">Go to Learn</a>
+                                </div>
+                            @else
+                                <div class="mt-4 relative overflow-x-auto border border-gray-100 rounded-lg">
+                                    <table class="w-full text-sm text-left text-gray-700">
+                                        <thead class="text-xs uppercase bg-gray-50 text-gray-600">
+                                            <tr>
+                                                <th class="px-4 py-3">Lesson</th>
+                                                <th class="px-4 py-3">Score</th>
+                                                <th class="px-4 py-3">Status</th>
+                                                <th class="px-4 py-3">Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($recentAttempts as $a)
+                                                <tr class="bg-white border-t border-gray-100">
+                                                    <td class="px-4 py-3 font-medium text-gray-900">
+                                                        {{ $a['lesson'] ?? '-' }}
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        {{ $a['score'] ?? 0 }}%
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        @if(($a['passed'] ?? false) === true)
+                                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">
+                                                                Passed
+                                                            </span>
+                                                        @else
+                                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">
+                                                                Failed
+                                                            </span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-4 py-3 text-gray-600">
+                                                        {{ $a['date'] ?? '-' }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+                        </x-ui.card>
+                    </div>
+
+                    {{-- Category Performance --}}
+                    <div class="lg:col-span-1">
+                        <x-ui.card>
+                            <x-ui.section-title :level="3">Category Performance</x-ui.section-title>
+                            <p class="mt-1 text-sm text-gray-600">Ringkasan performa per kategori</p>
+
+                            @if(empty($categoryPerformance) || count($categoryPerformance) === 0)
+                                <div class="mt-4 text-sm text-gray-600">
+                                    Data kategori belum tersedia.
+                                </div>
+                            @else
+                                <div class="mt-5 space-y-4">
+                                    @foreach($categoryPerformance as $c)
+                                        @php($pct = (int) ($c['percent'] ?? 0))
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <span class="text-sm font-medium text-gray-800">
+                                                    {{ $c['name'] ?? 'Category' }}
+                                                </span>
+                                                <span class="text-sm font-semibold text-gray-900">
+                                                    {{ $pct }}%
+                                                </span>
+                                            </div>
+
+                                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                                <div class="bg-gray-900 h-2.5 rounded-full"
+                                                     style="width: {{ max(0, min(100, $pct)) }}%"></div>
+                                            </div>
+
+                                            @if(isset($c['meta']))
+                                                <div class="mt-1 text-xs text-gray-500">
+                                                    {{ $c['meta'] }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </x-ui.card>
+                    </div>
+                </div>
+
             </div>
         </x-ui.container>
     </div>

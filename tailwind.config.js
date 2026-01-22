@@ -8,6 +8,7 @@ export default {
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
+        './resources/js/**/*.js',     // ⬅️ tambahkan ini (penting)
         "./node_modules/flowbite/**/*.js",
     ],
 
@@ -19,5 +20,8 @@ export default {
         },
     },
 
-    plugins: [forms, flowbite],
+    plugins: [
+        forms,
+        flowbite
+    ],
 };

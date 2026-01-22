@@ -1,8 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Levels
-        </h2>
+        <x-ui.breadcrumb :items="[
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Levels']
+        ]" />
     </x-slot>
 
     <div class="pt-4 pb-8">
