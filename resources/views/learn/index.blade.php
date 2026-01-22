@@ -20,7 +20,7 @@
                 </div>
             @endif
 
-            <div class="space-y-4">
+            <div class="space-y-6">
                 @foreach ($levels as $level)
                     @php
                         $isUnlocked = $user->hasUnlockedLevel($level);
