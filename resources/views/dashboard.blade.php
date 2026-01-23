@@ -173,8 +173,69 @@
                         </x-ui.card>
                     </div>
 
-                    {{-- Category Performance --}}
-                    <div class="lg:col-span-1">
+                    {{-- Right Column: Leaderboard + Category Performance --}}
+                    <div class="lg:col-span-1 space-y-6">
+                        {{-- Leaderboard Widget --}}
+                        <x-ui.card>
+                            <div class="flex items-center justify-between mb-4">
+                                <x-ui.section-title :level="3">Leaderboard</x-ui.section-title>
+                                <span class="text-xs font-medium px-2 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-100">
+                                    Weekly
+                                </span>
+                            </div>
+
+                            @if($topLeaderboard->isEmpty())
+                                <p class="text-sm text-gray-500">No active learners this week.</p>
+                            @else
+                                <div class="space-y-4">
+                                    @foreach($topLeaderboard as $index => $user)
+                                        <div class="flex items-center gap-3">
+                                            {{-- Rank --}}
+                                            <div class="flex-none w-8 text-center font-bold text-lg">
+                                                @if($index === 0) 🥇
+                                                @elseif($index === 1) 🥈
+                                                @elseif($index === 2) 🥉
+                                                @else #{{ $index + 1 }}
+                                                @endif
+                                            </div>
+
+                                            {{-- User Info --}}
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center gap-2">
+                                                    <p class="text-sm font-semibold text-gray-900 truncate">
+                                                        {{ $user->name }}
+                                                    </p>
+                                                    @if($user->is_me)
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800">
+                                                            You
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                <p class="text-xs text-cool-gray-500">
+                                                    <span class="font-medium text-gray-900">{{ number_format($user->total_correct) }}</span> pts
+                                                </p>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                {{-- User Rank Footer --}}
+                                <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                                    <div class="text-sm text-gray-600">
+                                        @if($myRank)
+                                            Your rank: <span class="font-bold text-gray-900">#{{ $myRank }}</span>
+                                        @else
+                                            <span class="text-gray-400">Not ranked</span>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('leaderboard.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline">
+                                        View details →
+                                    </a>
+                                </div>
+                            @endif
+                        </x-ui.card>
+
+                        {{-- Category Performance --}}
                         <x-ui.card>
                             <x-ui.section-title :level="3">Category Performance</x-ui.section-title>
                             <p class="mt-1 text-sm text-gray-600">Ringkasan performa per kategori</p>
