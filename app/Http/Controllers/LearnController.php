@@ -23,6 +23,7 @@ class LearnController extends Controller
         return view('learn.index', compact('levels', 'user'));
     }
 
+
     public function showLevel(Level $level)
     {
         $lessons = $level->lessons()

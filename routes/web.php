@@ -6,6 +6,7 @@ use App\Http\Controllers\GuidebookController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttemptController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LeaderboardController;
 
 
 Route::get('/', function () {
@@ -37,6 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // History
     Route::get('/attempts', [AttemptController::class, 'index'])->name('attempts.index');
+    
+    // Leaderboard
+    Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
 });
 
 Route::middleware(['auth', 'role:admin'])->get('/admin-test', fn () => 'ADMIN OK');

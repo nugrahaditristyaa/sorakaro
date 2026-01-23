@@ -116,11 +116,33 @@
                     </li>
 
                     <li>
-                        <a href="{{ route('learn.index') }}"
-                           class="flex items-center px-3 py-2 rounded-lg
-                                  {{ request()->routeIs('learn.*') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
-                            <span>Learn</span>
-                        </a>
+                        <button type="button"
+                                class="flex items-center w-full px-3 py-2 text-base font-medium transition duration-75 rounded-lg group
+                                       {{ request()->routeIs('learn.*') || request()->routeIs('dashboard.guidebook') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}"
+                                aria-controls="dropdown-learn"
+                                data-collapse-toggle="dropdown-learn"
+                                aria-expanded="{{ request()->routeIs('learn.*') || request()->routeIs('dashboard.guidebook') ? 'true' : 'false' }}">
+                            <span class="flex-1 text-left whitespace-nowrap">Learn</span>
+                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                            </svg>
+                        </button>
+                        <ul id="dropdown-learn" class="{{ request()->routeIs('learn.*') || request()->routeIs('dashboard.guidebook') ? 'block' : 'hidden' }} py-2 space-y-1">
+                            <li>
+                                <a href="{{ route('learn.index') }}"
+                                   class="flex items-center w-full p-2 pl-9 text-sm font-medium rounded-lg transition duration-75
+                                          {{ request()->routeIs('learn.index') || request()->routeIs('learn.level') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50' }}">
+                                    Levels
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('dashboard.guidebook') }}"
+                                   class="flex items-center w-full p-2 pl-9 text-sm font-medium rounded-lg transition duration-75
+                                          {{ request()->routeIs('dashboard.guidebook') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50' }}">
+                                    Guidebook
+                                </a>
+                            </li>
+                        </ul>
                     </li>
 
                     <li>
@@ -136,6 +158,14 @@
                            class="flex items-center px-3 py-2 rounded-lg
                                   {{ request()->routeIs('attempts.*') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
                             <span>Attempts</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('leaderboard.index') }}"
+                           class="flex items-center px-3 py-2 rounded-lg
+                                  {{ request()->routeIs('leaderboard.*') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <span>Leaderboard</span>
                         </a>
                     </li>
 

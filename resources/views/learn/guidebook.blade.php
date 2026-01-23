@@ -1,19 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Guidebook
-                </h2>
-            </div>
-            
-            <!-- <x-ui.button variant="ghost" :href="route('learn.level', $level)" class="shrink-0">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back
-            </x-ui.button> -->
-        </div>
+        <x-ui.breadcrumb :items="[
+            ['label' => 'Learn', 'url' => route('learn.index')],
+            ['label' => 'Guidebook']
+        ]" />
     </x-slot>
 
     <div class="py-12">

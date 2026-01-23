@@ -91,7 +91,45 @@ class DashboardController extends Controller
             })
             ->toArray();
 
-        // 6. Return View
+        // 6. Leaderboard Top 3 (Weekly)
+        $sevenDaysAgo = now()->subDays(7);
+        // Get all ranked users for the week to determine top 3 and my rank
+        // Aggregation: sum correct, calculate pass rate, average score, total attempts
+        $leaderboardData = DB::table('attempt_answers')
+            ->join('attempts', 'attempt_answers.attempt_id', '=', 'attempts.id')
+            ->join('users', 'attempts.user_id', '=', 'users.id')
+            ->where('attempts.created_at', '>=', $sevenDaysAgo)
+            ->select([
+                'users.id',
+                'users.name',
+                DB::raw('SUM(attempt_answers.is_correct) as total_correct'),
+                DB::raw('COUNT(DISTINCT attempts.id) as total_attempts'),
+                DB::raw('COUNT(DISTINCT CASE WHEN attempts.passed = 1 THEN attempts.id END) as passed_attempts'),
+                DB::raw('AVG(attempts.score) as avg_score')
+            ])
+            ->groupBy('users.id', 'users.name')
+            // Order By Priority: Total Correct -> Pass Rate -> Avg Score -> Total Attempts
+            ->orderByDesc('total_correct')
+            ->orderByRaw('(COUNT(DISTINCT CASE WHEN attempts.passed = 1 THEN attempts.id END) / COUNT(DISTINCT attempts.id)) DESC')
+            ->orderByDesc('avg_score')
+            ->orderByDesc('total_attempts')
+            ->get();
+
+        // Extract Top 3
+        $topLeaderboard = $leaderboardData->take(3)->map(function ($user) use ($userId) {
+            $user->is_me = $user->id === $userId;
+            return $user;
+        });
+
+        // Determine My Rank
+        $myRank = null;
+        // Search in the full collection
+        $myPosition = $leaderboardData->search(fn($u) => $u->id === $userId);
+        if ($myPosition !== false) {
+            $myRank = $myPosition + 1;
+        }
+
+        // 7. Return View
         return view('dashboard', compact(
             'totalAttempts',
             'avgScore',
@@ -99,7 +137,9 @@ class DashboardController extends Controller
             'currentLevel',
             'lastUnfinished',
             'recentAttempts',
-            'categoryPerformance'
+            'categoryPerformance',
+            'topLeaderboard',
+            'myRank'
         ));
     }
 }
