@@ -11,6 +11,7 @@ class Question extends Model
     protected $fillable = [
         'lesson_id',
         'type',
+        'image_path',       // Storage path for visual layer
         'prompt',
         'explanation',
         'order',
@@ -61,6 +62,16 @@ class Question extends Model
     public function hasAudio(): bool
     {
         return !empty($this->audio_path);
+    }
+
+    /**
+     * Returns true when this question has an image (visual mode).
+     * Like audio, image is a presentation layer that can be combined
+     * with any question type.
+     */
+    public function hasImage(): bool
+    {
+        return !empty($this->image_path);
     }
 
     /**

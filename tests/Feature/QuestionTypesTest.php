@@ -28,6 +28,14 @@ test('hasAudio correctly identifies audio presence', function () {
     expect($hasAudio->hasAudio())->toBeTrue();
 });
 
+test('hasImage correctly identifies image presence', function () {
+    $noImage = new Question(['image_path' => null]);
+    $hasImage = new Question(['image_path' => 'images/apple.jpg']);
+
+    expect($noImage->hasImage())->toBeFalse();
+    expect($hasImage->hasImage())->toBeTrue();
+});
+
 test('isCorrectTextAnswer correctly validates using accepted_answers array', function () {
     $question = new Question([
         'type' => 'writing',

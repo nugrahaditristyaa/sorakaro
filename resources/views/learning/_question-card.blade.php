@@ -59,6 +59,18 @@
         <p class="text-gray-800 font-medium leading-relaxed">{{ $question->prompt }}</p>
     </div>
 
+    {{-- ── Image: visual layer ──────────────────────────────────────────────── --}}
+    @if($question->hasImage())
+        <div class="mb-6 pl-10">
+            <div class="relative w-full max-w-sm rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
+                <img src="{{ Storage::disk('public')->url($question->image_path) }}"
+                     alt="Question Image"
+                     class="w-full h-auto max-h-64 object-contain"
+                     loading="lazy">
+            </div>
+        </div>
+    @endif
+
     {{-- ── MCQ: radio choices ───────────────────────────────────────────────── --}}
     @if(!$question->isWritingType())
         <div class="space-y-2 pl-10">

@@ -19,6 +19,7 @@ use Filament\Forms\Get;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Filters\SelectFilter;
 
 class QuestionResource extends Resource
@@ -107,6 +108,23 @@ class QuestionResource extends Resource
                         ->columnSpanFull(),
                 ])
                 ->collapsible(),
+
+            // ── Image: visual upload ─────────────────────────────────────────
+            Section::make('🖼️ Image Visual')
+                ->description('Upload an image to show with the question. Any question type can have an image.')
+                ->schema([
+                    FileUpload::make('image_path')
+                        ->label('Image File')
+                        ->disk('public')
+                        ->directory('question-images')
+                        ->image()
+                        ->imageEditor()
+                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                        ->maxSize(5120) // 5 MB
+                        ->helperText('Accepted: JPG, PNG, WEBP — max 5 MB')
+                        ->columnSpanFull(),
+                ])
+                ->collapsible(),
         ]);
     }
 
@@ -148,6 +166,11 @@ class QuestionResource extends Resource
                     ->falseIcon('heroicon-o-minus')
                     ->trueColor('success')
                     ->falseColor('gray'),
+
+                ImageColumn::make('image_path')
+                    ->label('🖼️ Image')
+                    ->circular()
+                    ->defaultImageUrl(url('/images/placeholder.png')),
 
                 TextColumn::make('prompt')
                     ->label('Question')
