@@ -13,33 +13,27 @@ use Illuminate\Support\Facades\Log;
 class LearningSessionService
 {
     /**
-     * Finds the active session or creates a new one safely.
-     * Generic version — used when resuming without a level context.
+     * Finds an existing active session (generic, no level context).
+     * Used only for read-only resume scenarios — does NOT create sessions.
+     *
+     * NOTE: Creating a session without a level_id would produce a "ghost" session
+     * that blocks the user. Always use getOrCreateSessionForLevel() instead.
      */
-    public function getOrCreateActiveSession(User $user): LearningSession
+    public function getOrCreateActiveSession(User $user): ?LearningSession
     {
-        return DB::transaction(function () use ($user) {
-            $session = LearningSession::where('user_id', $user->id)
-                ->whereNotIn('status', ['completed'])
-                ->lockForUpdate()
-                ->latest()
-                ->first();
-
-            if (! $session) {
-                $session = LearningSession::create([
-                    'user_id' => $user->id,
-                    'status'  => 'not_started',
-                ]);
-                Log::info("Created new learning session for user {$user->id}");
-            }
-
-            return $session;
-        });
+        return LearningSession::where('user_id', $user->id)
+            ->whereIn('status', LearningSession::ACTIVE_STATUSES)
+            ->whereNotNull('level_id')
+            ->lockForUpdate()
+            ->latest()
+            ->first();
     }
 
     /**
      * Finds an active session for a specific level, or creates one.
      * Used when the user clicks a level card on the dashboard.
+     *
+     * Guarantees EXACTLY ONE active session per user per level.
      */
     public function getOrCreateSessionForLevel(User $user, \App\Models\Level $level): LearningSession
     {
@@ -47,7 +41,7 @@ class LearningSessionService
             // Look for an in-progress session already linked to this level
             $session = LearningSession::where('user_id', $user->id)
                 ->where('level_id', $level->id)
-                ->whereNotIn('status', ['completed'])
+                ->whereIn('status', LearningSession::ACTIVE_STATUSES)
                 ->lockForUpdate()
                 ->latest()
                 ->first();
@@ -56,9 +50,11 @@ class LearningSessionService
                 $session = LearningSession::create([
                     'user_id'  => $user->id,
                     'level_id' => $level->id,
-                    'status'   => 'not_started',
+                    'status'   => LearningSession::STATUS_NOT_STARTED,
                 ]);
-                Log::info("Created new learning session for user {$user->id} on level {$level->id}");
+                Log::info("[LearningSessionService] Created new session#{$session->id} for user {$user->id} on level {$level->id}.");
+            } else {
+                Log::info("[LearningSessionService] Resumed existing session#{$session->id} for user {$user->id} on level {$level->id}: status='{$session->status}'.");
             }
 
             return $session;
@@ -94,15 +90,15 @@ class LearningSessionService
                 'finished_at' => now(),
             ]);
 
-            // Update session status.
+            // Update session status to pretest_done.
             // NOTE: level_id is intentionally NOT overridden here.
             // The user already selected their level via startLevel(); the pretest
             // is a knowledge check (not a placement test) for that specific level.
             $session->update([
-                'status' => 'pretest_done',
+                'status' => LearningSession::STATUS_PRETEST_DONE,
             ]);
 
-            Log::info("User {$user->id} completed pretest for level {$session->level_id}. Score: {$score}/{$attempt->total_questions}");
+            Log::info("[LearningSessionService] User {$user->id} completed pretest for session#{$session->id} level {$session->level_id}. Score: {$score}/{$attempt->total_questions}");
         });
     }
 
@@ -146,7 +142,7 @@ class LearningSessionService
             $improvement = $posttestScore - $pretestScore;
 
             $session->update([
-                'status'      => 'completed',
+                'status'      => LearningSession::STATUS_COMPLETED,
                 'improvement' => $improvement,
             ]);
 
@@ -156,7 +152,7 @@ class LearningSessionService
                 $unlockService->checkAndUnlockNextLevel($user, $attempt->lesson);
             }
 
-            Log::info("User {$user->id} completed posttest. Passed: " . ($isPassed ? 'Yes' : 'No') . ". Improvement: {$improvement}%");
+            Log::info("[LearningSessionService] User {$user->id} completed session#{$session->id}. Passed: " . ($isPassed ? 'Yes' : 'No') . ". Improvement: {$improvement}%");
         });
     }
 

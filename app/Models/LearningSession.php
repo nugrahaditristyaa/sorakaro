@@ -4,9 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 
 class LearningSession extends Model
 {
+    // ─── Status Constants ─────────────────────────────────────────────────────
+    // Use these instead of raw strings to prevent silent typo bugs.
+
+    public const STATUS_NOT_STARTED    = 'not_started';
+    public const STATUS_PRETEST_DONE   = 'pretest_done';
+    public const STATUS_GUIDEBOOK_DONE = 'guidebook_done';
+    public const STATUS_POSTTEST_DONE  = 'posttest_done';
+    public const STATUS_COMPLETED      = 'completed';
+
+    /** All statuses that represent an in-progress (non-completed) session. */
+    public const ACTIVE_STATUSES = [
+        self::STATUS_NOT_STARTED,
+        self::STATUS_PRETEST_DONE,
+        self::STATUS_GUIDEBOOK_DONE,
+        self::STATUS_POSTTEST_DONE,
+    ];
+
     protected $fillable = [
         'user_id',
         'pretest_attempt_id',
@@ -69,14 +87,15 @@ class LearningSession extends Model
 
     /**
      * Whether this session has completed the pretest step.
+     * NOTE: 'not_started' is explicitly excluded — the user must finish the pretest first.
      */
     public function hasDonePretest(): bool
     {
         return in_array($this->status, [
-            'pretest_done',
-            'guidebook_done',
-            'posttest_done',
-            'completed',
+            self::STATUS_PRETEST_DONE,
+            self::STATUS_GUIDEBOOK_DONE,
+            self::STATUS_POSTTEST_DONE,
+            self::STATUS_COMPLETED,
         ]);
     }
 
@@ -86,9 +105,9 @@ class LearningSession extends Model
     public function hasDoneGuidebook(): bool
     {
         return in_array($this->status, [
-            'guidebook_done',
-            'posttest_done',
-            'completed',
+            self::STATUS_GUIDEBOOK_DONE,
+            self::STATUS_POSTTEST_DONE,
+            self::STATUS_COMPLETED,
         ]);
     }
 
@@ -98,22 +117,43 @@ class LearningSession extends Model
     public function hasDonePosttest(): bool
     {
         return in_array($this->status, [
-            'posttest_done',
-            'completed',
+            self::STATUS_POSTTEST_DONE,
+            self::STATUS_COMPLETED,
         ]);
     }
 
     /**
+     * Whether this session is still active (not completed).
+     */
+    public function isActive(): bool
+    {
+        return in_array($this->status, self::ACTIVE_STATUSES);
+    }
+
+    /**
      * Resolves the correct route based on the current session status.
+     *
+     * This is the SINGLE SOURCE OF TRUTH for learning navigation.
+     * Every status maps to exactly one route — no ambiguous defaults.
      */
     public function resolveLearningRoute(): string
     {
-        return match($this->status) {
-            'not_started'    => 'learning.pretest',
-            'pretest_done'   => 'learning.guidebook',
-            'guidebook_done' => 'learning.posttest',
-            'posttest_done', 'completed' => 'learning.result',
-            default          => 'learning.pretest',
+        $route = match($this->status) {
+            self::STATUS_NOT_STARTED    => 'learning.pretest',
+            self::STATUS_PRETEST_DONE   => 'learning.guidebook',
+            self::STATUS_GUIDEBOOK_DONE => 'learning.posttest',
+            self::STATUS_POSTTEST_DONE  => 'learning.result',
+            self::STATUS_COMPLETED      => 'learning.result',
+            default => null,
         };
+
+        if ($route === null) {
+            Log::error("[LearningSession#{$this->id}] Unknown status '{$this->status}' — cannot resolve route.");
+            return 'learning.pretest'; // safe fallback, should never happen
+        }
+
+        Log::debug("[LearningSession#{$this->id}] status='{$this->status}' → route='{$route}'");
+
+        return $route;
     }
 }

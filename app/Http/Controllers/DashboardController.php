@@ -242,9 +242,9 @@ class DashboardController extends Controller
         // 9. Next Lesson — unused now, removing for clarity
         $nextLesson = null;
 
-        // 10. Active LearningSession (any non-completed)
+        // 10. Active LearningSession (any non-completed, must have level)
         $activeSession = LearningSession::where('user_id', $userId)
-            ->whereNotIn('status', ['completed'])
+            ->whereIn('status', LearningSession::ACTIVE_STATUSES)
             ->whereNotNull('level_id')
             ->with('level')
             ->latest()

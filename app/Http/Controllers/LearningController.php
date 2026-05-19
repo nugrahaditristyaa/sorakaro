@@ -22,23 +22,25 @@ class LearningController extends Controller
     // ─── 1. Start ─────────────────────────────────────────────────────────────
 
     /**
-     * Generic resume: if there is an active session, continue it.
-     * If not, send the user back to the dashboard to choose a level.
+     * Generic resume: if there is a valid active session (with a level), continue it.
+     * Falls back to dashboard if no session with a level is found.
+     *
+     * NOTE: Sessions with null level_id are "ghost" sessions created before level
+     * selection — they are ignored and cleaned up by getActiveSession().
      */
     public function start(Request $request)
     {
-        $session = LearningSession::where('user_id', $request->user()->id)
-            ->whereNotIn('status', ['completed'])
-            ->latest()
-            ->first();
+        $user    = $request->user();
+        $session = $this->getActiveSession($request);
 
         if (! $session) {
+            Log::info("[LearningController::start] No valid active session for user {$user->id}. Redirecting to dashboard.");
             return redirect()->route('dashboard')
                 ->with('info', 'Pilih level yang ingin kamu pelajari.');
         }
 
         $route = $session->resolveLearningRoute();
-        Log::info("Resuming learning session {$session->id}, route: {$route}");
+        Log::info("[LearningController::start] Resuming session#{$session->id} for user {$user->id}: status='{$session->status}' level={$session->level_id} → route='{$route}'");
 
         return redirect()->route($route);
     }
@@ -49,16 +51,19 @@ class LearningController extends Controller
      */
     public function startLevel(Request $request, Level $level)
     {
+        $user = $request->user();
+
         // Guard: level must be unlocked for this user
-        if (! $request->user()->hasUnlockedLevel($level)) {
+        if (! $user->hasUnlockedLevel($level)) {
+            Log::warning("[LearningController::startLevel] User {$user->id} attempted locked level {$level->id}.");
             return redirect()->route('dashboard')
                 ->with('error', 'Level ini belum terbuka. Selesaikan level sebelumnya terlebih dahulu.');
         }
 
-        $session = $this->sessionService->getOrCreateSessionForLevel($request->user(), $level);
+        $session = $this->sessionService->getOrCreateSessionForLevel($user, $level);
 
         $route = $session->resolveLearningRoute();
-        Log::info("Starting level {$level->id} for user {$request->user()->id}, route: {$route}");
+        Log::info("[LearningController::startLevel] User {$user->id} session#{$session->id} level {$level->id}: status='{$session->status}' → route='{$route}'");
 
         return redirect()->route($route);
     }
@@ -105,7 +110,9 @@ class LearningController extends Controller
         $session = $this->getActiveSession($request);
 
         if (! $session || $session->hasDonePretest()) {
-            return redirect()->route($session ? $session->resolveLearningRoute() : 'learning.start');
+            $route = $session ? $session->resolveLearningRoute() : 'learning.start';
+            Log::info("[LearningController::submitPretest] Early exit for user {$request->user()->id}: session=" . ($session ? "#{$session->id} status={$session->status}" : 'null') . " → {$route}");
+            return redirect()->route($route);
         }
 
         $attempt = $session->pretestAttempt;
@@ -114,11 +121,11 @@ class LearningController extends Controller
         }
 
         $answers = $request->input('answers', []);
-        
+
         // Delegate submission to service (includes transaction, logging, score, level determination)
         $this->sessionService->submitPretest($session, $attempt, $answers, $request->user());
 
-        $levelName = $session->fresh()->getLevelName();
+        Log::info("[LearningController::submitPretest] User {$request->user()->id} completed pretest for level {$session->level_id}.");
 
         return redirect()->route('learning.guidebook')
             ->with('success', 'Tes pemahaman awal selesai! Sekarang pelajari materinya. 📖');
@@ -149,10 +156,13 @@ class LearningController extends Controller
         $session = $this->getActiveSession($request);
 
         if (! $session || $session->hasDoneGuidebook()) {
-            return redirect()->route($session ? $session->resolveLearningRoute() : 'learning.start');
+            $route = $session ? $session->resolveLearningRoute() : 'learning.start';
+            Log::info("[LearningController::completeGuidebook] Early exit for user {$request->user()->id}: session=" . ($session ? "#{$session->id} status={$session->status}" : 'null') . " → {$route}");
+            return redirect()->route($route);
         }
 
-        $session->update(['status' => 'guidebook_done']);
+        $session->update(['status' => LearningSession::STATUS_GUIDEBOOK_DONE]);
+        Log::info("[LearningController::completeGuidebook] Session#{$session->id} user={$request->user()->id} status → guidebook_done.");
 
         return redirect()->route('learning.posttest')
             ->with('success', 'Panduan selesai! Sekarang uji pemahaman kamu. 💪');
@@ -202,7 +212,9 @@ class LearningController extends Controller
         $session = $this->getActiveSession($request);
 
         if (! $session || $session->hasDonePosttest()) {
-            return redirect()->route($session ? $session->resolveLearningRoute() : 'learning.start');
+            $route = $session ? $session->resolveLearningRoute() : 'learning.start';
+            Log::info("[LearningController::submitPosttest] Early exit for user {$request->user()->id}: session=" . ($session ? "#{$session->id} status={$session->status}" : 'null') . " → {$route}");
+            return redirect()->route($route);
         }
 
         $attempt = $session->posttestAttempt;
@@ -213,6 +225,7 @@ class LearningController extends Controller
         $answers = $request->input('answers', []);
         
         $this->sessionService->submitPosttest($session, $attempt, $answers, $request->user());
+        Log::info("[LearningController::submitPosttest] Session#{$session->id} user={$request->user()->id} completed posttest.");
 
         return redirect()->route('learning.result');
     }
@@ -221,29 +234,49 @@ class LearningController extends Controller
 
     public function result(Request $request)
     {
-        // Try to get an active completed session, or the most recent one
-        $session = LearningSession::where('user_id', $request->user()->id)
-            ->where('status', 'completed')
+        $user    = $request->user();
+        $session = LearningSession::where('user_id', $user->id)
+            ->where('status', LearningSession::STATUS_COMPLETED)
             ->with(['pretestAttempt', 'posttestAttempt', 'level'])
             ->latest()
             ->first();
 
         if (! $session) {
+            Log::info("[LearningController::result] No completed session for user {$user->id}. Redirecting to learning.start.");
             return redirect()->route('learning.start');
         }
 
+        Log::info("[LearningController::result] Showing result for session#{$session->id} user={$user->id}.");
         return view('learning.result', compact('session'));
     }
 
     // ─── Private helpers ─────────────────────────────────────────────────────
 
     /**
-     * Get the active (not completed) LearningSession for the user.
+     * Get the single valid active LearningSession for the user.
+     *
+     * Rules:
+     *  - Status must be in ACTIVE_STATUSES (not 'completed')
+     *  - MUST have level_id set (sessions without level are "ghost" sessions —
+     *    they are deleted here to prevent them blocking future sessions)
+     *  - Returns the most recently updated one
      */
     private function getActiveSession(Request $request): ?LearningSession
     {
-        return LearningSession::where('user_id', $request->user()->id)
-            ->whereNotIn('status', ['completed'])
+        $user = $request->user();
+
+        // Auto-cleanup: delete ghost sessions (active status but no level_id)
+        $deleted = LearningSession::where('user_id', $user->id)
+            ->whereIn('status', LearningSession::ACTIVE_STATUSES)
+            ->whereNull('level_id')
+            ->delete();
+
+        if ($deleted > 0) {
+            Log::warning("[getActiveSession] Cleaned up {$deleted} ghost session(s) (null level_id) for user {$user->id}.");
+        }
+
+        return LearningSession::where('user_id', $user->id)
+            ->whereIn('status', LearningSession::ACTIVE_STATUSES)
             ->whereNotNull('level_id')
             ->latest()
             ->first();
