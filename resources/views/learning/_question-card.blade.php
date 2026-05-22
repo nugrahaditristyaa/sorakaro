@@ -11,43 +11,61 @@
 
     {{-- ── Listening: audio player ─────────────────────────────────────────── --}}
     @if($question->hasAudio())
-        <div class="mb-4 p-3 bg-indigo-50 rounded-xl border border-indigo-100 flex items-center gap-3"
-             x-data="audioPlayer('{{ Storage::disk('public')->url($question->audio_path) }}')"
-             x-init="init()">
+        <div class="mb-4"
+             x-data="audioPlayer('{{ Storage::disk('public')->url($question->audio_path) }}')">
 
-            {{-- Play / Pause button --}}
-            <button type="button"
-                    @click="toggle()"
-                    :aria-label="playing ? 'Pause audio' : 'Play audio'"
-                    class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2">
-                {{-- Play icon --}}
-                <svg x-show="!playing && !loading" class="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
+            {{-- Error fallback --}}
+            <div x-show="audioError"
+                 class="flex items-center gap-3 p-3 bg-red-50 rounded-xl border border-red-200 text-sm text-red-700">
+                <svg class="w-4 h-4 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                 </svg>
-                {{-- Pause icon --}}
-                <svg x-show="playing && !loading" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" style="display:none">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                </svg>
-                {{-- Loading spinner --}}
-                <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" style="display:none">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-            </button>
-
-            {{-- Progress bar --}}
-            <div class="flex-1">
-                <div class="text-xs font-semibold text-indigo-700 mb-1.5">🎧 Dengarkan audio terlebih dahulu</div>
-                <div class="relative w-full h-1.5 bg-indigo-200 rounded-full overflow-hidden cursor-pointer"
-                     @click="seek($event)">
-                    <div class="absolute inset-y-0 left-0 bg-indigo-500 rounded-full transition-all"
-                         :style="'width:' + progress + '%'"></div>
-                </div>
+                <span>Audio tidak dapat diputar.</span>
+                <button type="button" @click="retry()"
+                        class="ml-auto text-xs font-semibold underline hover:no-underline focus:outline-none">
+                    Coba lagi
+                </button>
             </div>
 
-            {{-- Time --}}
-            <span class="text-xs text-indigo-500 font-mono flex-shrink-0"
-                  x-text="timeDisplay"></span>
+            {{-- Normal player --}}
+            <div x-show="!audioError"
+                 class="p-3 bg-indigo-50 rounded-xl border border-indigo-100 flex items-center gap-3">
+
+                {{-- Play / Pause button --}}
+                <button type="button"
+                        @click="toggle()"
+                        :aria-label="playing ? 'Pause audio' : 'Play audio'"
+                        class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2">
+                    {{-- Play icon --}}
+                    <svg x-show="!playing && !loading" class="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    {{-- Pause icon --}}
+                    <svg x-show="playing && !loading" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" style="display:none">
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                    {{-- Loading spinner --}}
+                    <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" style="display:none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                </button>
+
+                {{-- Progress bar --}}
+                <div class="flex-1">
+                    <div class="text-xs font-semibold text-indigo-700 mb-1.5">🎧 Dengarkan audio terlebih dahulu</div>
+                    <div class="relative w-full h-1.5 bg-indigo-200 rounded-full overflow-hidden cursor-pointer"
+                         @click="seek($event)">
+                        <div class="absolute inset-y-0 left-0 bg-indigo-500 rounded-full transition-all"
+                             :style="'width:' + progress + '%'"></div>
+                    </div>
+                </div>
+
+                {{-- Time --}}
+                <span class="text-xs text-indigo-500 font-mono flex-shrink-0"
+                      x-text="timeDisplay"></span>
+            </div>
         </div>
     @endif
 

@@ -82,9 +82,17 @@
                                                     </div>
 
                                                      @if($item->audio_path)
-                                                        <div x-data="audioPlayer('{{ Storage::disk('public')->url($item->audio_path) }}')"
-                                                             x-init="init()">
+                                                        <div x-data="audioPlayer('{{ Storage::disk('public')->url($item->audio_path) }}')">
+                                                            {{-- Error fallback --}}
+                                                            <span x-show="audioError"
+                                                                  class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs text-red-600 bg-red-50 border border-red-200">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"/></svg>
+                                                                Gagal
+                                                                <button type="button" @click="retry()" class="underline">Ulang</button>
+                                                            </span>
+                                                            {{-- Normal play button --}}
                                                             <button type="button"
+                                                                    x-show="!audioError"
                                                                     @click="toggle()"
                                                                     :title="playing ? 'Jeda audio' : 'Putar audio'"
                                                                     class="group shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border
@@ -123,33 +131,5 @@
         </x-ui.container>
     </div>
 
-    @push('scripts')
-    <script>
-    function audioPlayer(src) {
-        return {
-            audio: null,
-            playing: false,
-            loading: false,
-
-            init() {
-                this.audio = new Audio(src);
-                this.audio.preload = 'none';
-                this.audio.addEventListener('loadstart', () => this.loading = true);
-                this.audio.addEventListener('canplay',   () => this.loading = false);
-                this.audio.addEventListener('ended',     () => this.playing = false);
-            },
-
-            toggle() {
-                if (this.playing) {
-                    this.audio.pause();
-                    this.playing = false;
-                } else {
-                    this.audio.play().then(() => { this.playing = true; }).catch(() => {});
-                }
-            },
-        };
-    }
-    </script>
-    @endpush
 </x-app-layout>
 

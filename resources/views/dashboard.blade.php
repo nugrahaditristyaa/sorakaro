@@ -13,7 +13,7 @@
                 <div>
                     <h1 class="flex items-center gap-4 text-2xl lg:text-3xl font-bold mb-1">
                        <img src="{{ Auth::user()->gender === 'female' ? asset('images/female.png') : asset('images/male.png') }}" alt="User Avatar" class="h-20 md:h-24 w-auto drop-shadow-md">
-                       <span>Selamat Datang, Menjuah-Juah {{ explode(' ', Auth::user()->name)[0] }}</span>
+                       <span>Selamat Datang, Mejuah-Juah {{ explode(' ', Auth::user()->name)[0] }}</span>
                     </h1>
                     <p class="text-blue-100 text-sm">
                         @if($levelsCompleted > 0)
