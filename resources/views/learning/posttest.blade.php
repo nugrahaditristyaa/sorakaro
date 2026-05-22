@@ -66,12 +66,15 @@
 
             <div class="mt-8 flex justify-end">
                 <button type="submit"
-                        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold
-                               px-8 py-3 rounded-xl shadow transition active:scale-95">
-                    Selesai & Lihat Hasil
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                    </svg>
+                        class="inline-flex flex-col items-center justify-center bg-blue-600 hover:bg-blue-700 text-white
+                               px-8 py-3 rounded-xl shadow transition active:scale-95 leading-tight">
+                    <div class="flex items-center gap-2 font-semibold">
+                        Selesai & Lihat Hasil
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </div>
+                    <span class="text-[11px] italic opacity-70 font-normal mt-0.5">enggo</span>
                 </button>
             </div>
         </form>

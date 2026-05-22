@@ -13,7 +13,7 @@
                 <div>
                     <h1 class="flex items-center gap-4 text-2xl lg:text-3xl font-bold mb-1">
                        <img src="{{ Auth::user()->gender === 'female' ? asset('images/female.png') : asset('images/male.png') }}" alt="User Avatar" class="h-20 md:h-24 w-auto drop-shadow-md">
-                       <span>Selamat Datang, Mejuah-Juah {{ explode(' ', Auth::user()->name)[0] }}</span>
+                       <span>Mejuah-juah, {{ explode(' ', Auth::user()->name)[0] }} 👋</span>
                     </h1>
                     <p class="text-blue-100 text-sm">
                         @if($levelsCompleted > 0)
@@ -101,23 +101,6 @@
 
         {{-- ── QUICK ACTIONS ── --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <a href="{{ route('learning.start') }}"
-               class="dash-card p-5 flex items-center gap-4 hover:border-blue-200 hover:shadow-md transition group">
-                <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="text-sm font-bold text-gray-900">Lanjutkan Belajar</div>
-                    <div class="text-xs text-gray-400">Lanjutkan sesi belajar terakhir</div>
-                </div>
-                <svg class="w-4 h-4 text-gray-300 ml-auto group-hover:text-blue-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </a>
-
             <a href="{{ route('dictionary.index') }}"
                class="dash-card p-5 flex items-center gap-4 hover:border-blue-200 hover:shadow-md transition group">
                 <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-100 transition">
@@ -127,6 +110,7 @@
                 </div>
                 <div>
                     <div class="text-sm font-bold text-gray-900">Kamus Bahasa Karo</div>
+                    <div class="text-[10px] italic opacity-70 text-gray-500 mb-0.5">kamus karo</div>
                     <div class="text-xs text-gray-400">Cari arti kata Karo ↔ Indonesia</div>
                 </div>
                 <svg class="w-4 h-4 text-gray-300 ml-auto group-hover:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,15 +163,21 @@
                                                 {{ $level->name }}
                                             </span>
                                             @if($completed)
-                                                <span class="inline-flex items-center gap-1 text-xs font-bold text-green-600">
-                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
-                                                    Selesai
-                                                </span>
+                                                <div class="flex flex-col items-end leading-none">
+                                                    <span class="inline-flex items-center gap-1 text-xs font-bold text-green-600">
+                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+                                                        Selesai
+                                                    </span>
+                                                    <span class="text-[10px] italic text-green-600 opacity-70 mt-1">enggo</span>
+                                                </div>
                                             @elseif(!$unlocked)
-                                                <span class="inline-flex items-center gap-1 text-xs font-medium text-gray-400">
-                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                                    Terkunci
-                                                </span>
+                                                <div class="flex flex-col items-end leading-none">
+                                                    <span class="inline-flex items-center gap-1 text-xs font-medium text-gray-400">
+                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                                        Terkunci
+                                                    </span>
+                                                    <span class="text-[10px] italic text-gray-400 opacity-70 mt-1">tekunci</span>
+                                                </div>
                                             @else
                                                 <span class="text-xs text-blue-500 font-bold">Terbuka</span>
                                             @endif
@@ -262,7 +252,8 @@
 
                     @if(empty($recentActivities) || count($recentActivities) === 0)
                         <div class="text-center py-6">
-                            <p class="text-sm text-gray-400 mb-3">Belum ada aktivitas belajar.</p>
+                            <p class="text-sm text-gray-400 mb-0.5">Belum ada aktivitas belajar.</p>
+                            <p class="text-[11px] italic text-gray-400 opacity-70 mb-3">la lit aktivitas</p>
                             <a href="{{ route('learn.index') }}"
                                class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
                                 Mulai Sekarang →
@@ -281,11 +272,20 @@
                                     </div>
                                     <div class="flex items-center gap-2 flex-shrink-0">
                                         @if($a['type'] === 'pretest' || $a['type'] === 'guidebook')
-                                            <span class="text-xs font-semibold text-gray-400">Selesai</span>
+                                            <div class="flex flex-col items-end leading-tight">
+                                                <span class="text-xs font-semibold text-gray-400">Selesai</span>
+                                                <span class="text-[10px] italic text-gray-400 opacity-70">enggo</span>
+                                            </div>
                                         @elseif($a['type'] === 'posttest_passed')
-                                            <span class="text-xs font-semibold text-blue-600">Lulus</span>
+                                            <div class="flex flex-col items-end leading-tight">
+                                                <span class="text-xs font-semibold text-blue-600">Lulus</span>
+                                                <span class="text-[10px] italic text-blue-600 opacity-70">enggo</span>
+                                            </div>
                                         @else
-                                            <span class="text-xs font-semibold text-gray-400">Coba Lagi</span>
+                                            <div class="flex flex-col items-end leading-tight">
+                                                <span class="text-xs font-semibold text-gray-400">Coba Lagi</span>
+                                                <span class="text-[10px] italic text-gray-400 opacity-70">ulangi nari</span>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>

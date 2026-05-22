@@ -37,13 +37,20 @@
                     @endif
                 </div>
 
-                <h1 class="text-2xl md:text-3xl font-bold mb-2">
+                <h1 class="text-2xl md:text-3xl font-bold mb-1">
                     @if($isPassed)
                         Selamat! Kamu berhasil menyelesaikan level ini 🎉
                     @else
                         Belum berhasil kali ini 🚀
                     @endif
                 </h1>
+                <div class="mb-3">
+                    @if($isPassed)
+                        <span class="text-lg italic text-green-100 opacity-90">Mejuah-juah!</span>
+                    @else
+                        <span class="text-lg italic text-blue-100 opacity-90">ulangi nari</span>
+                    @endif
+                </div>
                 <p class="{{ $isPassed ? 'text-green-50' : 'text-blue-50' }} text-sm md:text-base max-w-sm mx-auto">
                     @if($isPassed)
                         Luar biasa! Kamu telah menguasai materi ini dengan sangat baik.
@@ -136,22 +143,28 @@
         <div class="flex flex-col sm:flex-row gap-3">
             @if($isPassed)
                 <a href="{{ route('dashboard') }}"
-                   class="flex-1 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700
-                          text-white font-semibold px-6 py-3 rounded-xl shadow transition active:scale-95">
-                    Lanjut ke Level Berikutnya
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                    </svg>
+                   class="flex-1 inline-flex flex-col items-center justify-center bg-blue-600 hover:bg-blue-700
+                          text-white px-6 py-3 rounded-xl shadow transition active:scale-95 leading-tight">
+                    <div class="flex items-center gap-2 font-semibold">
+                        Lanjut ke Level Berikutnya
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </div>
+                    <span class="text-[11px] italic opacity-70 font-normal mt-0.5">tambahi</span>
                 </a>
             @else
                 <a href="{{ route('learning.start') }}"
-                   class="flex-1 inline-flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100
-                          border border-blue-200 text-blue-700 font-semibold px-6 py-3 rounded-xl shadow-sm transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                    Ulangi Belajar
+                   class="flex-1 inline-flex flex-col items-center justify-center bg-blue-50 hover:bg-blue-100
+                          border border-blue-200 text-blue-700 px-6 py-3 rounded-xl shadow-sm transition leading-tight">
+                    <div class="flex items-center gap-2 font-semibold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Ulangi Belajar
+                    </div>
+                    <span class="text-[11px] italic opacity-70 font-normal mt-0.5">ulangi nari</span>
                 </a>
 
                 <a href="{{ route('dashboard') }}"

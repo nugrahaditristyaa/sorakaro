@@ -68,7 +68,10 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                         </svg>
-                        <span>Dashboard</span>
+                        <div class="flex flex-col items-start leading-tight">
+                            <span class="font-medium">Dashboard</span>
+                            <span class="text-[10px] italic opacity-70">dasbor</span>
+                        </div>
                     </a>
                     {{-- Mulai Belajar → level selection --}}
                     <a href="{{ route('learn.index') }}"
@@ -77,7 +80,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span>Mulai Belajar</span>
+                        <div class="flex flex-col items-start leading-tight">
+                            <span class="font-medium">Mulai Belajar</span>
+                            <span class="text-[10px] italic opacity-70">ermulih belajar</span>
+                        </div>
                     </a>
 
                     {{-- Kamus Bahasa Karo --}}
@@ -86,7 +92,10 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
-                        <span>Kamus</span>
+                        <div class="flex flex-col items-start leading-tight">
+                            <span class="font-medium">Kamus</span>
+                            <span class="text-[10px] italic opacity-70">kamus karo</span>
+                        </div>
                     </a>
 
 
@@ -95,7 +104,10 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                         </svg>
-                        <span>Progres Saya</span>
+                        <div class="flex flex-col items-start leading-tight">
+                            <span class="font-medium">Progres Saya</span>
+                            <span class="text-[10px] italic opacity-70">perkembanganku</span>
+                        </div>
                     </a>
 
                     <a href="{{ route('leaderboard.index') }}"
@@ -103,7 +115,10 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <span>Papan Peringkat</span>
+                        <div class="flex flex-col items-start leading-tight">
+                            <span class="font-medium">Papan Peringkat</span>
+                            <span class="text-[10px] italic opacity-70">tingkat nilai</span>
+                        </div>
                     </a>
                 </nav>
 
@@ -115,7 +130,10 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
-                        <span>Profil</span>
+                        <div class="flex flex-col items-start leading-tight">
+                            <span class="font-medium">Profil</span>
+                            <span class="text-[10px] italic opacity-70">profil</span>
+                        </div>
                     </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -123,7 +141,10 @@
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                             </svg>
-                            <span>Keluar</span>
+                            <div class="flex flex-col items-start leading-tight">
+                                <span class="font-medium">Keluar</span>
+                                <span class="text-[10px] italic opacity-70">nusur</span>
+                            </div>
                         </button>
                     </form>
                 </div>
