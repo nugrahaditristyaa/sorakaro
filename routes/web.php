@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttemptController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\DictionaryController;
+
 
 
 Route::get('/', function () {
@@ -63,6 +65,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Leaderboard
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
+
+    // Kamus Bahasa Karo
+    Route::get('/kamus', [DictionaryController::class, 'index'])->name('dictionary.index');
 });
 
 Route::middleware(['auth', 'role:admin'])->get('/admin-test', fn () => 'ADMIN OK');
