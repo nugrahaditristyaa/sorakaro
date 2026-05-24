@@ -25,19 +25,17 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        $user = $request->user();
-        
-        if ($user && $user->hasRole('admin')) {
-            auth()->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+        // $user = $request->user();
+        // if ($user && $user->hasRole('admin')) {
+        //     auth()->logout();
+        //     $request->session()->invalidate();
+        //     $request->session()->regenerateToken();
 
-            return redirect('/admin/login')
-            ->with('error', 'Akun admin harus login lewat halaman Admin.');
-        }
+        //     return redirect('/admin/login')
+        //     ->with('error', 'Akun admin harus login lewat halaman Admin.');
+        // }
 
         return redirect()->intended(route('dashboard'));
     }
