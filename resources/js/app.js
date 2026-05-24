@@ -38,7 +38,6 @@ window.__sorakaroAudioRegistry = {
 Alpine.data('audioPlayer', (src) => ({
     audio: null,
     playing: false,
-    loading: false,
     audioError: false,
     progress: 0,
     timeDisplay: '0:00',
@@ -52,8 +51,8 @@ Alpine.data('audioPlayer', (src) => ({
         this.audio = new Audio(src);
         this.audio.preload = 'none';
 
-        this.audio.addEventListener('loadstart',  () => { this.loading = true; this.audioError = false; });
-        this.audio.addEventListener('canplay',    () => { this.loading = false; });
+        this.audio.addEventListener('loadstart',  () => { this.audioError = false; });
+        this.audio.addEventListener('canplay',    () => { /* ready */ });
         this.audio.addEventListener('ended',      () => { this.playing = false; this.progress = 0; });
         this.audio.addEventListener('timeupdate', () => {
             if (this.audio.duration) {
@@ -64,7 +63,6 @@ Alpine.data('audioPlayer', (src) => ({
 
         // Handle network / decode errors gracefully
         this.audio.addEventListener('error', () => {
-            this.loading  = false;
             this.playing  = false;
             this.audioError = true;
         });
@@ -97,16 +95,13 @@ Alpine.data('audioPlayer', (src) => ({
             // Register as the active player — stops any other playing audio
             window.__sorakaroAudioRegistry.activate(this);
 
-            this.loading = true;
             this.audio.play()
                 .then(() => {
-                    this.playing  = true;
-                    this.loading  = false;
+                    this.playing    = true;
                     this.audioError = false;
                 })
                 .catch(() => {
-                    this.loading  = false;
-                    this.playing  = false;
+                    this.playing = false;
                     // Don't set audioError here — autoplay policy rejections are transient;
                     // user can simply tap again on mobile.
                 });

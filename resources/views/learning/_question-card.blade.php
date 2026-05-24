@@ -38,17 +38,12 @@
                         :aria-label="playing ? 'Pause audio' : 'Play audio'"
                         class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2">
                     {{-- Play icon --}}
-                    <svg x-show="!playing && !loading" class="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <svg x-show="!playing" class="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z"/>
                     </svg>
                     {{-- Pause icon --}}
-                    <svg x-show="playing && !loading" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" style="display:none">
+                    <svg x-show="playing" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" style="display:none">
                         <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                    </svg>
-                    {{-- Loading spinner --}}
-                    <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" style="display:none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>
                 </button>
 
