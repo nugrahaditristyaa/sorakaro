@@ -106,7 +106,6 @@
             <x-primary-button class="ms-4">
                 <div class="flex flex-col items-center leading-tight">
                     <span>Daftar</span>
-                    <span class="text-[10px] italic opacity-70 font-normal">daftar</span>
                 </div>
             </x-primary-button>
         </div>

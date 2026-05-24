@@ -110,7 +110,6 @@
                 </div>
                 <div>
                     <div class="text-sm font-bold text-gray-900">Kamus Bahasa Karo</div>
-                    <div class="text-[10px] italic opacity-70 text-gray-500 mb-0.5">kamus karo</div>
                     <div class="text-xs text-gray-400">Cari arti kata Karo ↔ Indonesia</div>
                 </div>
                 <svg class="w-4 h-4 text-gray-300 ml-auto group-hover:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +167,6 @@
                                                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
                                                         Selesai
                                                     </span>
-                                                    <span class="text-[10px] italic text-green-600 opacity-70 mt-1">enggo</span>
                                                 </div>
                                             @elseif(!$unlocked)
                                                 <div class="flex flex-col items-end leading-none">
@@ -235,17 +233,14 @@
                                         @if($a['type'] === 'pretest' || $a['type'] === 'guidebook')
                                             <div class="flex flex-col items-end leading-tight">
                                                 <span class="text-xs font-semibold text-gray-400">Selesai</span>
-                                                <span class="text-[10px] italic text-gray-400 opacity-70">enggo</span>
                                             </div>
                                         @elseif($a['type'] === 'posttest_passed')
                                             <div class="flex flex-col items-end leading-tight">
                                                 <span class="text-xs font-semibold text-blue-600">Lulus</span>
-                                                <span class="text-[10px] italic text-blue-600 opacity-70">enggo</span>
                                             </div>
                                         @else
                                             <div class="flex flex-col items-end leading-tight">
                                                 <span class="text-xs font-semibold text-gray-400">Coba Lagi</span>
-                                                <span class="text-[10px] italic text-gray-400 opacity-70">ulangi nari</span>
                                             </div>
                                         @endif
                                     </div>

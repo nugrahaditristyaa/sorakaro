@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\Attempt;
 use App\Models\Lesson;
 use App\Models\Level;
@@ -14,39 +13,31 @@ class AttemptController extends Controller
     {
         $userId = $request->user()->id;
 
-        // Build base query
-        $query = Attempt::with(['lesson.level'])
-            ->where('user_id', $userId);
-
-        // Apply Filters
-        if ($request->filled('lesson_id')) {
-            $query->where('lesson_id', $request->lesson_id);
-        }
-
-        if ($request->filled('level_id')) {
-            $query->whereHas('lesson.level', function ($q) use ($request) {
-                $q->where('id', $request->level_id);
-            });
-        }
-
-        if ($request->filled('status')) {
-            if ($request->status === 'passed') {
-                $query->where('passed', true);
-            } elseif ($request->status === 'failed') {
-                $query->where('passed', false);
-            }
-        }
-
-        // Get Paginated Results
-        $attempts = $query->latest()
+        // ── Build query with filters ──────────────────────────────────────────
+        $attempts = Attempt::with(['lesson.level'])
+            ->where('user_id', $userId)
+            // Filter: Pelajaran (lesson_id)
+            ->when($request->filled('lesson_id'), function ($q) use ($request) {
+                $q->where('lesson_id', $request->lesson_id);
+            })
+            // Filter: Tingkat (level_id) — via lesson → level relation
+            ->when($request->filled('level_id'), function ($q) use ($request) {
+                $q->whereHas('lesson', function ($lq) use ($request) {
+                    $lq->where('level_id', $request->level_id);
+                });
+            })
+            // Filter: Status (passed / failed)
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->where('passed', $request->status === 'passed');
+            })
+            ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        // ----------------------------------------------------
-        // Build Filter Dropdown Data (Only distinct/relevant items)
-        // ----------------------------------------------------
-        
-        // Optimize: Get distinct lesson IDs from this user's attempts first
+        // ── Build dropdown option lists ───────────────────────────────────────
+        // Show only lessons/levels that this user has actually attempted,
+        // so the filter dropdowns are relevant and not polluted with unused data.
+
         $attemptedLessonIds = Attempt::where('user_id', $userId)
             ->distinct()
             ->pluck('lesson_id');
@@ -55,12 +46,9 @@ class AttemptController extends Controller
             ->orderBy('title')
             ->get(['id', 'title']);
 
-        // Get levels from those lessons
-        $levelOptions = Level::whereIn('id', function($q) use ($attemptedLessonIds) {
-                $q->select('level_id')
-                  ->from('lessons')
-                  ->whereIn('id', $attemptedLessonIds);
-            })
+        $levelOptions = Level::whereIn('id',
+                Lesson::whereIn('id', $attemptedLessonIds)->distinct()->pluck('level_id')
+            )
             ->orderBy('name')
             ->get(['id', 'name']);
 
