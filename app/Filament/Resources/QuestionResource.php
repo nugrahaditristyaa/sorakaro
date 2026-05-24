@@ -91,7 +91,7 @@ class QuestionResource extends Resource
                         ->reorderableWithButtons()
                         ->columnSpanFull(),
                 ])
-                ->visible(fn (Get $get) => in_array($get('type'), ['writing', 'typing']))
+                ->visible(fn(Get $get) => in_array($get('type'), ['writing', 'typing']))
                 ->collapsible(),
 
             // ── Listening: audio upload ──────────────────────────────────────
@@ -102,6 +102,7 @@ class QuestionResource extends Resource
                         ->label('Audio File')
                         ->disk('public')
                         ->directory('question-audio')
+                        ->visibility('public')
                         ->acceptedFileTypes(['audio/mpeg', 'audio/wav', 'audio/ogg'])
                         ->maxSize(10240) // 10 MB
                         ->helperText('Accepted: MP3, WAV, OGG — max 10 MB')
@@ -115,9 +116,10 @@ class QuestionResource extends Resource
                 ->schema([
                     FileUpload::make('image_path')
                         ->label('Image File')
+                        ->image()
                         ->disk('public')
                         ->directory('question-images')
-                        ->image()
+                        ->visibility('public')
                         ->imageEditor()
                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                         ->maxSize(5120) // 5 MB
@@ -146,13 +148,13 @@ class QuestionResource extends Resource
                 TextColumn::make('type')
                     ->label('Type')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'mcq'     => 'info',
                         'writing' => 'success',
                         'typing'  => 'warning',
                         default   => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
                         'mcq'     => '🔘 MCQ',
                         'writing' => '✍️ Writing',
                         'typing'  => '⌨️ Typing',
