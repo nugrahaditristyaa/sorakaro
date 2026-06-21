@@ -9,6 +9,7 @@ use App\Http\Controllers\AttemptController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\DictionaryController;
+use App\Http\Controllers\FlashcardController;
 
 
 
@@ -68,6 +69,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Kamus Bahasa Karo
     Route::get('/kamus', [DictionaryController::class, 'index'])->name('dictionary.index');
+
+    // Flashcard Bahasa Karo (standalone module)
+    Route::get('/flashcards', [FlashcardController::class, 'index'])->name('flashcards.index');
+    Route::get('/flashcards/{category}', [FlashcardController::class, 'show'])->name('flashcards.show');
 });
 
 Route::middleware(['auth', 'role:admin'])->get('/admin-test', fn () => 'ADMIN OK');

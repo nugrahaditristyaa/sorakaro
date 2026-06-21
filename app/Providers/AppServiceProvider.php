@@ -17,10 +17,14 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any application services.
+     *
+     * Forces HTTPS in production so Storage::disk('public')->url() and
+     * asset() always return https:// links — required for audio/image
+     * assets to load when the app sits behind SSL termination (Nginx/Caddy).
      */
     public function boot(): void
     {
-        if (env('APP_ENV') !== 'stagging') {
+        if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }
     }

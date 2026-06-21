@@ -169,6 +169,7 @@ class QuestionResource extends Resource
 
                 ImageColumn::make('image_path')
                     ->label('🖼️ Image')
+                    ->disk('public')
                     ->circular()
                     ->defaultImageUrl(url('/images/placeholder.png')),
 
